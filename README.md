@@ -1,15 +1,3 @@
-# Cloud & DevOps Portfolio & Digital Business Card
-
-Production-Grade Static Web Architecture on AWS with Terraform & GitHub Actions CI/CD
-
-[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
-[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
-[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/features/actions)
-[![CloudFront](https://img.shields.io/badge/Amazon_CloudFront-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/cloudfront/)
-[![Bootstrap 5](https://img.shields.io/badge/Bootstrap_5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-
----
-
 ## About The Project
 
 The frontend is built using standard HTML5, CSS3, JavaScript, and Bootstrap 5. The hosting, security, caching, and automated deployment pipelines are provisioned on AWS using Infrastructure as Code (Terraform) and GitHub Actions CI/CD.
@@ -56,8 +44,8 @@ Files are uploaded to S3 with distinct HTTP caching headers depending on their c
 │   ├── main.tf                     # S3 (Private), CloudFront, OAC, Bucket Policy
 │   ├── variables.tf                # Input variables (region, bucket name, tags)
 │   ├── outputs.tf                  # CloudFront URL, Distribution ID, S3 Name
-│   ├── backend.tf.example          # Remote state & DynamoDB state locking example
-│   └── terraform.tfvars.example    # Example variable values
+│   ├── backend.tf.example          # Remote state & DynamoDB state locking 
+│   └── terraform.tfvars.example    # variable values
 │
 ├── src/                            # Static Website Source Files
 │   ├── css/
@@ -70,13 +58,13 @@ Files are uploaded to S3 with distinct HTTP caching headers depending on their c
 │   │   └── translations.js
 │   └── index.html
 │
-├── docs/                           # Project screenshots and architecture diagrams
+├── docs/                           
 │   ├── architecture.png
 │   ├── kartvizit.png
 │   └── sequence-diagram.png
 │
-├── .gitignore                      # Git ignore rules for Terraform and OS artifacts
-└── README.md                       # Project documentation
+├── .gitignore                      
+└── README.md                       
 ```
 
 ---

@@ -1,0 +1,37 @@
+name: Terraform Lint & Validation
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+      - '.github/workflows/terraform-lint.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - '.github/workflows/terraform-lint.yml'
+  workflow_dispatch:
+
+jobs:
+  terraform-check:
+    name: Terraform Format & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: Check Terraform Format
+        run: terraform -chdir=infra fmt -check -diff
+
+      - name: Initialize Terraform (No Backend)
+        run: terraform -chdir=infra init -backend=false
+
+      - name: Validate Terraform Configuration
+        run: terraform -chdir=infra validate

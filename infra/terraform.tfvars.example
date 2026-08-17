@@ -1,0 +1,8 @@
+aws_region   = "us-east-1"
+project_name = "ybb-portfolio"
+bucket_name  = "ybb-portfolio-pau-ybb"
+
+tags = {
+  Project   = "ybb-portfolio"
+  ManagedBy = "Terraform"
+}

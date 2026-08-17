@@ -1,0 +1,19 @@
+# =====================================================================================================================
+# TERRAFORM REMOTE STATE CONFIGURATION (AWS S3 + DYNAMODB LOCKING)
+# =====================================================================================================================
+# To enable remote state management:
+# 1. Create an S3 bucket (e.g., my-terraform-state-bucket) with versioning & encryption enabled.
+# 2. Create a DynamoDB table (e.g., terraform-state-locks) with Partition key "LockID" (String).
+# 3. Rename this file to `backend.tf` and update the bucket/region values below.
+# 4. Run `terraform init -migrate-state` to migrate local state to remote S3.
+# =====================================================================================================================
+
+terraform {
+  backend "s3" {
+    bucket         = "YOUR-TERRAFORM-STATE-BUCKET-NAME"
+    key            = "portfolio/production/terraform.tfstate"
+    region         = "eu-central-1"
+    dynamodb_table = "YOUR-DYNAMODB-LOCK-TABLE-NAME"
+    encrypt        = true
+  }
+}

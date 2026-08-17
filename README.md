@@ -207,10 +207,6 @@ Once configured, the automation pipeline operates as follows:
 
 ---
 
-## Contact
-
-**Yusuf Berat Bayraktar** — Cloud & DevOps Engineer
-
 <p align="left">
   <a href="https://ybayraktarb.com/" target="_blank">
     <img src="https://img.shields.io/badge/WEBSITE-232F3E?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Website" />

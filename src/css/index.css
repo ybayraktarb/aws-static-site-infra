@@ -209,3 +209,33 @@ body {
   background-repeat: no-repeat;
   background-position: center;
 }
+
+/* Card Studio & Top Action Bar */
+.top-action-bar {
+  max-width: 1140px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.modal-content {
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: var(--card-shadow);
+}
+
+.modal-header,
+.modal-footer {
+  border-color: #f1f3f5;
+}
+
+.nav-tabs .nav-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--text);
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+

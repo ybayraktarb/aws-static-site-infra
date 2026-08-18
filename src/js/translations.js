@@ -16,6 +16,9 @@ const translations = {
     accordion__cert_btn: "Sertifikalar & Beceriler",
     accordion__cert_section_title: "Sertifikalar & Eğitimler",
     accordion__skills_section_title: "Teknik Beceriler",
+    studio__open_btn: "Kartvizit Stüdyosu",
+    studio__share_btn: "Bağlantıyı Paylaş",
+    studio__modal_title: "Kartvizit Stüdyosu & Personel Yönetimi",
   },
 
   en: {
@@ -35,5 +38,8 @@ const translations = {
     accordion__cert_btn: "Certifications & Skills",
     accordion__cert_section_title: "Certifications & Training",
     accordion__skills_section_title: "Technical Skills",
+    studio__open_btn: "Card Studio",
+    studio__share_btn: "Share Link",
+    studio__modal_title: "Card Studio & Personnel Manager",
   },
 };

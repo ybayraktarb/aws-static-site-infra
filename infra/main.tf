@@ -83,6 +83,26 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
+# CLOUDFRONT FUNCTIONS (Edge Compute: Security Headers & URI Rewrite)
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_cloudfront_function" "viewer_response_headers" {
+  name    = "${var.project_name}-security-headers"
+  runtime = "cloudfront-js-2.0"
+  comment = "Injects enterprise HTTP security headers at edge"
+  publish = true
+  code    = file("${path.module}/functions/viewer_response_headers.js")
+}
+
+resource "aws_cloudfront_function" "viewer_request_router" {
+  name    = "${var.project_name}-uri-router"
+  runtime = "cloudfront-js-2.0"
+  comment = "Handles clean URL routing and SPA subpaths at edge"
+  publish = true
+  code    = file("${path.module}/functions/viewer_request_router.js")
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
 # CLOUDFRONT CDN DISTRIBUTION
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -108,6 +128,16 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.viewer_request_router.arn
+    }
+
+    function_association {
+      event_type   = "viewer-response"
+      function_arn = aws_cloudfront_function.viewer_response_headers.arn
+    }
   }
 
   # SPA / Static fallback error responses

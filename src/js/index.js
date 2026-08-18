@@ -155,21 +155,165 @@ function renderProfileLinks() {
   });
 }
 
-$(document).ready(function () {
-  const { firstName, lastName, photo, favicon } = portfolioData.profile;
+let activeData = JSON.parse(JSON.stringify(portfolioData));
 
-  document.getElementById("favicon").href = favicon;
+function renderProfileHeader() {
+  const { firstName, lastName, photo, favicon } = activeData.profile;
+  if (favicon) {
+    document.getElementById("favicon").href = favicon;
+  }
   const profilePhoto = document.getElementById("profile-photo");
-  profilePhoto.src = photo;
+  profilePhoto.src = photo || "image/cv.jpg";
   profilePhoto.alt = `${firstName} ${lastName}`;
   document.getElementById("profile-name").innerHTML =
     `${firstName} <span class="last-name">${lastName}</span>`;
+}
 
+function initStudioForm() {
+  const p = activeData.profile;
+  document.getElementById("edit-first-name").value = p.firstName || "";
+  document.getElementById("edit-last-name").value = p.lastName || "";
+  document.getElementById("edit-role-tr").value = p.role?.tr || "";
+  document.getElementById("edit-role-en").value = p.role?.en || "";
+  document.getElementById("edit-location-tr").value = p.location?.tr || "";
+  document.getElementById("edit-location-en").value = p.location?.en || "";
+  
+  if (translations.tr.accordion__about_bio && translations.tr.accordion__about_bio.length > 0) {
+    document.getElementById("edit-bio-tr").value = translations.tr.accordion__about_bio.join("\n\n");
+  }
+  if (translations.en.accordion__about_bio && translations.en.accordion__about_bio.length > 0) {
+    document.getElementById("edit-bio-en").value = translations.en.accordion__about_bio.join("\n\n");
+  }
+}
+
+function copyShareLink() {
+  const hash = CardState.encode(activeData);
+  const shareUrl = `${window.location.origin}${window.location.pathname}#data=${hash}`;
+  
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    const shareBtn = document.getElementById("share-card-btn");
+    const originalText = shareBtn.innerHTML;
+    shareBtn.innerHTML = `✓ Copied!`;
+    shareBtn.classList.remove("btn-outline-dark");
+    shareBtn.classList.add("btn-success");
+    setTimeout(() => {
+      shareBtn.innerHTML = originalText;
+      shareBtn.classList.remove("btn-success");
+      shareBtn.classList.add("btn-outline-dark");
+    }, 2000);
+  }).catch(err => {
+    console.error("Could not copy share link", err);
+  });
+}
+
+function setupStudioHandlers() {
+  // Avatar live WebP optimization
+  document.getElementById("edit-photo-file").addEventListener("change", async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const optimizedWebp = await ImageProcessor.processImage(file, 400, 400, 0.85);
+      activeData.profile.photo = optimizedWebp;
+      document.getElementById("profile-photo").src = optimizedWebp;
+    } catch (err) {
+      alert("Error optimizing avatar: " + err.message);
+    }
+  });
+
+  // Batch Image Optimizer
+  document.getElementById("bulk-images-input").addEventListener("change", async function (e) {
+    const files = e.target.files;
+    if (!files.length) return;
+    const statusEl = document.getElementById("bulk-images-status");
+    statusEl.innerHTML = `<span class="text-primary">Optimizing ${files.length} images to WebP...</span>`;
+    
+    const results = await ImageProcessor.processBatch(files, 400, 400);
+    const successCount = results.filter(r => r.success).length;
+    statusEl.innerHTML = `<span class="text-success fw-semibold">✓ ${successCount}/${files.length} images converted to WebP in-browser.</span>`;
+  });
+
+  // Save / Apply Card
+  document.getElementById("save-card-btn").addEventListener("click", function () {
+    activeData.profile.firstName = document.getElementById("edit-first-name").value.trim();
+    activeData.profile.lastName = document.getElementById("edit-last-name").value.trim();
+    activeData.profile.role.tr = document.getElementById("edit-role-tr").value.trim();
+    activeData.profile.role.en = document.getElementById("edit-role-en").value.trim();
+    activeData.profile.location.tr = document.getElementById("edit-location-tr").value.trim();
+    activeData.profile.location.en = document.getElementById("edit-location-en").value.trim();
+
+    const bioTr = document.getElementById("edit-bio-tr").value.trim();
+    const bioEn = document.getElementById("edit-bio-en").value.trim();
+    if (bioTr) translations.tr.accordion__about_bio = bioTr.split("\n\n");
+    if (bioEn) translations.en.accordion__about_bio = bioEn.split("\n\n");
+
+    const encoded = CardState.encode(activeData);
+    if (encoded) {
+      window.location.hash = `data=${encoded}`;
+    }
+
+    renderProfileHeader();
+    applyLang(currentLang);
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("studioModal"));
+    if (modal) modal.hide();
+
+    copyShareLink();
+  });
+
+  // Share Button
+  document.getElementById("share-card-btn").addEventListener("click", copyShareLink);
+
+  // JSON Export / Import
+  document.getElementById("export-json-btn").addEventListener("click", function () {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeData, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `${activeData.profile.firstName}_card_profile.json`);
+    dlAnchor.click();
+  });
+
+  document.getElementById("import-json-btn").addEventListener("click", function () {
+    document.getElementById("import-json-file").click();
+  });
+
+  document.getElementById("import-json-file").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (imported.profile) {
+          activeData = imported;
+          document.getElementById("team-json-preview").value = JSON.stringify(imported, null, 2);
+          renderProfileHeader();
+          initStudioForm();
+          applyLang(currentLang);
+        }
+      } catch (err) {
+        alert("Invalid JSON profile format");
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+$(document).ready(function () {
+  // Decode URL hash state if available
+  const decodedState = CardState.decode(window.location.hash);
+  if (decodedState && decodedState.profile) {
+    activeData = decodedState;
+  }
+
+  renderProfileHeader();
   renderProfileLinks();
+  initStudioForm();
+  setupStudioHandlers();
   applyLang(detectLang());
 
   $("#lang-toggle").on("click", function () {
     applyLang(nextLang(currentLang));
   });
 });
+
 

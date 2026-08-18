@@ -30,8 +30,17 @@ The frontend is built using standard HTML5, CSS3, JavaScript, and Bootstrap 5. T
 
 ## Architectural & Security Decisions
 
+### Edge Computing with CloudFront Functions
+Sub-millisecond compute logic is executed at AWS Edge locations using CloudFront Functions:
+* **Viewer Response (`viewer_response_headers.js`):** Injects enterprise-grade HTTP security headers (`Strict-Transport-Security`, `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Permissions-Policy`, `Referrer-Policy`) without hitting the origin.
+* **Viewer Request (`viewer_request_router.js`):** Handles clean URI resolution and SPA routing directly at edge points of presence.
+
 ### Private S3 with CloudFront Origin Access Control (OAC)
 The S3 bucket is completely restricted from public internet access via S3 Public Access Blocks (`block_public_acls`, `block_public_policy`). Content can only be fetched by Amazon CloudFront using SigV4-signed requests through Origin Access Control (OAC). This prevents direct S3 exposure, offloads DDoS protection and TLS termination to edge locations, and enforces central access policies.
+
+### Zero-Cost State Serialization & In-Browser Optimization
+* **Client-Side Image Optimization:** Avatars and staff photos are converted to square-cropped, high-performance WebP formats on-device via the HTML5 Canvas API, eliminating cloud CPU conversion costs.
+* **URL Hash State Serialization:** Custom card configurations and team profiles are encoded into compressed URL permalinks and local storage, providing instant sharing capabilities with $0 database overhead.
 
 ### Keyless Authentication with IAM OpenID Connect (OIDC)
 Static, long-lived AWS Access Keys are not stored in GitHub Secrets. Instead, GitHub Actions authenticates directly with AWS IAM via OpenID Connect (OIDC). On each pipeline run, short-lived temporary credentials are generated through AWS STS and scoped strictly to the deployment workflow.
@@ -53,18 +62,23 @@ Files are uploaded to S3 with distinct HTTP caching headers depending on their c
 │       └── terraform-lint.yml      # CI: Terraform formatting and validation checks
 │
 ├── infra/                          # Infrastructure as Code (Terraform)
-│   ├── main.tf                     # S3 (Private), CloudFront, OAC, Bucket Policy
+│   ├── functions/                  # CloudFront Functions (Edge Compute)
+│   │   ├── viewer_request_router.js
+│   │   └── viewer_response_headers.js
+│   ├── main.tf                     # S3, CloudFront, OAC, Edge Functions, Policies
 │   ├── variables.tf                # Input variables (region, bucket name, tags)
 │   ├── outputs.tf                  # CloudFront URL, Distribution ID, S3 Name
 │   ├── backend.tf.example          # Remote state & DynamoDB state locking example
 │   └── terraform.tfvars.example    # Example variable values
 │
-├── src/                            # Static Website Source Files
+├── src/                            # Website & Application Source Files
 │   ├── css/
 │   │   └── index.css
 │   ├── image/
 │   │   └── ... (Images, favicon, icons)
 │   ├── js/
+│   │   ├── card-state.js           # URL hash serialization & persistence
+│   │   ├── image-processor.js      # In-browser WebP image optimization
 │   │   ├── icon.js
 │   │   ├── index.js
 │   │   └── translations.js
